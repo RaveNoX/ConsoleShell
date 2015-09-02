@@ -44,11 +44,11 @@ namespace ConsoleShell.Internal
 
                 if (tokens.Any() || endsWithSpace)
                 {
-                    var commandValue = command.Value as ShellCommand;
+                    var commandValue = command.Value as IShellCommand;
 
                     if (commandValue != null)
                     {
-                        var completeResult = commandValue.DoComplete(shell, tokens.ToArray()) ?? new string[] { };
+                        var completeResult = commandValue.Complete(shell, tokens.ToArray()) ?? new string[] { };
 
                         if (!(completeResult.Length == 1 && completeResult[0] == tokens.Last() && endsWithSpace))
                         {
@@ -77,12 +77,12 @@ namespace ConsoleShell.Internal
 
             if (commands.Count == 1)
             {
-                var command = (commands.First().Value as ShellCommand);
+                var command = (commands.First().Value as IShellCommand);
                 if (command != null)
                 {
                     return () =>
                     {
-                        command.DoInvoke(shell, tokensQueue.ToArray());
+                        command.Invoke(shell, tokensQueue.ToArray());
                     };
                 }
             }
@@ -106,7 +106,7 @@ namespace ConsoleShell.Internal
                 {
                     var match = matches.First();
 
-                    if (match.Value is ShellCommand)
+                    if (match.Value is IShellCommand)
                     {
                         return new SortedDictionary<string, object>
                         {
@@ -140,7 +140,7 @@ namespace ConsoleShell.Internal
 
         #region Commands operations
 
-        public void AddCommand(ShellCommand command)
+        public void AddCommand(IShellCommand command)
         {
             if (command == null) throw new ArgumentNullException(nameof(command));
 
@@ -159,7 +159,7 @@ namespace ConsoleShell.Internal
 
         #region Tree operations
 
-        private void TreeAdd(ShellCommand command)
+        private void TreeAdd(IShellCommand command)
         {
             var tokens = new Queue<string>(ShellCommandTokenizer.Tokenize(command.Pattern));
 

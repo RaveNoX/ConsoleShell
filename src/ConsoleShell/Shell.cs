@@ -146,7 +146,7 @@ namespace ConsoleShell
             }
         }
 
-        public Shell AddCommand(ShellCommand command)
+        public Shell AddCommand(IShellCommand command)
         {
             lock (_lock)
             {

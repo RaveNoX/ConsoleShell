@@ -71,7 +71,7 @@ namespace DualShell
                 shell.AddLambdaCommand("quit", "Exit from program", Exit);
             }
 
-            shell.AddLambdaCommand("help", "Prints this help", (command, args) => InvokeHelp(shell, command, args));
+            shell.AddLambdaCommand("help", "Prints this help", InvokeHelp);
             shell.AddLambdaCommand("options", "Test options", InvokeTestOptions);
 
             shell.AddLambdaCommand("sip list", "list sip peers", InvokeFakeCommand);
@@ -83,25 +83,28 @@ namespace DualShell
             shell.AddLambdaCommand("sip acl stick", InvokeFakeCommand);
             shell.AddLambdaCommand("sip acl flush", InvokeFakeCommand);
 
-            shell.AddLambdaCommand("list", InvokeFakeCommand, (command, tokens) =>
-            {
-                var items = new[] {"users", "peers"};
-
-                if (tokens.Length == 0)
-                {
-                    return items;
-                }
-
-                return tokens.Length == 1 ? items.Where(x => x.StartsWith(tokens[0])).ToArray() : null;
-            });
+            shell.AddLambdaCommand("list", InvokeFakeCommand, CompleteHandler);
         }
 
-        private static void Exit(ShellCommand shellCommand, string[] strings)
+        private static string[] CompleteHandler(Shell shell, IShellCommand command, string[] tokens)
+        {
+            var items = new[] {"users", "peers"};
+
+            if (tokens.Length == 0)
+            {
+                return items;
+            }
+
+            return tokens.Length == 1 ? items.Where(x => x.StartsWith(tokens[0])).ToArray() : null;
+        }
+
+        private static void Exit(Shell shell, IShellCommand shellCommand, string[] strings)
         {
             throw new ApplicationExitException();
         }
 
-        private static void InvokeTestOptions(ShellCommand shellCommand, string[] args)
+
+        private static void InvokeTestOptions(Shell shell, IShellCommand shellCommand, string[] args)
         {
             var prefixes = new[] {"--", "-", "/"};
 
@@ -128,7 +131,7 @@ namespace DualShell
             Console.WriteLine(JsonConvert.SerializeObject(options, Formatting.Indented));
         }
 
-        private static void InvokeHelp(Shell shell, ShellCommand shellCommand, string[] args)
+        private static void InvokeHelp(Shell shell, IShellCommand shellCommand, string[] args)
         {
             var items = shell.GetCommandsDescriptions(string.Join(" ", args));
 
@@ -141,7 +144,7 @@ namespace DualShell
             }
         }
 
-        private static void InvokeFakeCommand(ShellCommand shellCommand, string[] args)
+        private static void InvokeFakeCommand(Shell shell, IShellCommand shellCommand, string[] args)
         {
             Console.WriteLine("Ivoke command \"{0}\" arguments: [ {1} ]", shellCommand.Pattern, string.Join(", ", args));
         }
