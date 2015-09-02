@@ -4,7 +4,7 @@ using System;
 
 #endregion
 
-namespace SharpShell
+namespace ConsoleShell
 {
     /// <summary>
     /// Command item for <see cref="Shell"/>

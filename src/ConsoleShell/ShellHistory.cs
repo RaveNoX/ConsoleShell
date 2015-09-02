@@ -9,7 +9,7 @@ using System.Text;
 
 #endregion
 
-namespace SharpShell
+namespace ConsoleShell
 {
     public class ShellHistory : IEnumerable<string>
     {

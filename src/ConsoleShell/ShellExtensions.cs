@@ -4,9 +4,9 @@ using System;
 
 #endregion
 
-namespace SharpShell
+namespace ConsoleShell
 {
-    public static class SharpShellExtensions
+    public static class ShellExtensions
     {
         public static Shell AddLambdaCommand(this Shell shell, string pattern, string description,
             Action<ShellCommand, string[]> invoke, Func<ShellCommand, string[], string[]> complete)

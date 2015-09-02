@@ -5,11 +5,11 @@ using System.Runtime.InteropServices;
 // General Information about an assembly is controlled through the following 
 // set of attributes. Change these attribute values to modify the information
 // associated with an assembly.
-[assembly: AssemblyTitle("SharpShell")]
+[assembly: AssemblyTitle("ConsoleShell")]
 [assembly: AssemblyDescription("Console Shell for .Net")]
 [assembly: AssemblyConfiguration("")]
 [assembly: AssemblyCompany("")]
-[assembly: AssemblyProduct("SharpShell")]
+[assembly: AssemblyProduct("ConsoleShell")]
 [assembly: AssemblyCopyright("Copyright © Artur Kraev 2015")]
 [assembly: AssemblyTrademark("")]
 [assembly: AssemblyCulture("")]

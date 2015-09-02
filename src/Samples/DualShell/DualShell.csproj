@@ -63,7 +63,7 @@
     <None Include="packages.config" />
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\..\SharpShell\SharpShell.csproj">
+    <ProjectReference Include="..\..\ConsoleShell\ConsoleShell.csproj">
       <Project>{d9a81b07-fb8b-4c52-90cc-38626e6c787a}</Project>
       <Name>SharpShell</Name>
     </ProjectReference>

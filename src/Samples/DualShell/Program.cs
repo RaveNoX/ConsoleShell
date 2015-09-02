@@ -6,9 +6,9 @@ using System.Dynamic;
 using System.IO;
 using System.Linq;
 using ColoredConsole;
+using ConsoleShell;
 using NDesk.Options;
 using Newtonsoft.Json;
-using SharpShell;
 
 #endregion
 

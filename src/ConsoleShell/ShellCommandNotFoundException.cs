@@ -5,7 +5,7 @@ using System.Collections.Generic;
 
 #endregion
 
-namespace SharpShell
+namespace ConsoleShell
 {
     public class ShellCommandNotFoundException : Exception
     {

@@ -5,7 +5,7 @@ using System.Text;
 
 #endregion
 
-namespace SharpShell.Internal
+namespace ConsoleShell.Internal
 {
     internal static class ShellCommandTokenizer
     {

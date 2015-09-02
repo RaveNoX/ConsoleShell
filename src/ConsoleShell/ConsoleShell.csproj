@@ -7,8 +7,8 @@
     <ProjectGuid>{D9A81B07-FB8B-4C52-90CC-38626E6C787A}</ProjectGuid>
     <OutputType>Library</OutputType>
     <AppDesignerFolder>Properties</AppDesignerFolder>
-    <RootNamespace>SharpShell</RootNamespace>
-    <AssemblyName>SharpShell</AssemblyName>
+    <RootNamespace>ConsoleShell</RootNamespace>
+    <AssemblyName>ConsoleShell</AssemblyName>
     <TargetFrameworkVersion>v4.5</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>
   </PropertyGroup>
@@ -46,18 +46,18 @@
     <Compile Include="Readline\Readline.cs" />
     <Compile Include="Readline\ReadlineState.cs" />
     <Compile Include="Readline\TabCompleteEventArgs.cs" />
-    <Compile Include="SharpShell.cs" />
+    <Compile Include="Shell.cs" />
     <Compile Include="CompleteShellCommandEventArgs.cs" />
     <Compile Include="InvokeShellCommandEventArgs.cs" />
     <Compile Include="ShellCommand.cs" />
     <Compile Include="ShellCommandNotFoundException.cs" />
     <Compile Include="Internal\ShellCommandsContainer.cs" />
     <Compile Include="Internal\ShellCommandTokenizer.cs" />
-    <Compile Include="SharpShellExtensions.cs" />
+    <Compile Include="ShellExtensions.cs" />
     <Compile Include="ShellHistory.cs" />
   </ItemGroup>
   <ItemGroup>
-    <None Include="SharpShell.csproj.nuspec" />
+    <None Include="ConsoleShell.csproj.nuspec" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 

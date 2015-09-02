@@ -6,7 +6,7 @@ using System.Linq;
 
 #endregion
 
-namespace SharpShell.Internal
+namespace ConsoleShell.Internal
 {
     internal class ShellCommandsContainer
     {

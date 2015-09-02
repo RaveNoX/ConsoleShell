@@ -7,7 +7,7 @@ using System.Text;
 
 #endregion
 
-namespace SharpShell.Readline
+namespace ConsoleShell.Readline
 {
     internal class Readline
     {

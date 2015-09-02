@@ -1,6 +1,6 @@
 using System;
 
-namespace SharpShell
+namespace ConsoleShell
 {
     public class CompleteShellCommandEventArgs:EventArgs
     {

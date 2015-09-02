@@ -4,7 +4,7 @@ using System;
 
 #endregion
 
-namespace SharpShell.Readline
+namespace ConsoleShell.Readline
 {
     internal static class ConsoleExtensions
     {

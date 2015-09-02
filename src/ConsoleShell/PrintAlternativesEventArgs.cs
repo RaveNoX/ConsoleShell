@@ -1,4 +1,4 @@
-﻿namespace SharpShell
+﻿namespace ConsoleShell
 {
     public class PrintAlternativesEventArgs
     {

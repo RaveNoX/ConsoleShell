@@ -1,4 +1,4 @@
-﻿namespace SharpShell.Readline
+﻿namespace ConsoleShell.Readline
 {
     internal enum ReadlineState
     {

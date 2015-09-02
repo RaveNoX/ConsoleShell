@@ -2,10 +2,10 @@
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
-using SharpShell.Internal;
-using SharpShell.Readline;
+using ConsoleShell.Internal;
+using ConsoleShell.Readline;
 
-namespace SharpShell
+namespace ConsoleShell
 {
     public class Shell
     {
