@@ -1,0 +1,17 @@
+﻿<?xml version="1.0"?>
+<package >
+  <metadata>
+    <id>$id$</id>
+    <version>$version$</version>
+    <authors>Artur Kraev</authors>
+    <owners>Artur Kraev</owners>    
+    <projectUrl>https://github.com/RaveNoX/SharpShell</projectUrl>    
+    <requireLicenseAcceptance>false</requireLicenseAcceptance>
+    <description>$description$</description>    
+    <copyright>Copyright © Artur Kraev 2015</copyright>
+    <tags>sharpshell sharp-shell shell command-line interface command parameters commandline interpreter parser</tags>
+    <dependencies>
+      <!--<dependency id="SampleDependency" version="1.0" />-->
+    </dependencies>
+  </metadata>
+</package>
