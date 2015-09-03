@@ -57,7 +57,7 @@ namespace ConsoleShell
                 }
                 catch (ShellCommandNotFoundException ex)
                 {
-                    OnShellCommandNotFound(input, ex.Tokens.ToArray());
+                    OnShellCommandNotFound(input);
                 }
 
                 History.AddUnique(input);
@@ -101,7 +101,7 @@ namespace ConsoleShell
                 var complete = _container.CompleteInput(this, buff).ToArray();
 
                 if (complete.Length == 1)
-                {
+                {                    
                     e.Output = complete.First() + " ";
                 }
                 else if (complete.Length > 1)
@@ -123,7 +123,7 @@ namespace ConsoleShell
 
             if (command == null)
             {
-                throw new ShellCommandNotFoundException(tokens);
+                throw new ShellCommandNotFoundException();
             }
 
             command();
@@ -166,14 +166,14 @@ namespace ConsoleShell
 
         #endregion
 
-        protected virtual void OnShellCommandNotFound(string input, string[] tokens)
+        protected virtual void OnShellCommandNotFound(string input)
         {
 
             var handler = ShellCommandNotFound;
 
             if (handler != null)
             {
-                handler.Invoke(this, new CommandNotFoundEventArgs(input, tokens));
+                handler.Invoke(this, new CommandNotFoundEventArgs(input));
             }
             else
             {

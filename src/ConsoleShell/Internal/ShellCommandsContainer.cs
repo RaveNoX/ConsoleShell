@@ -36,13 +36,13 @@ namespace ConsoleShell.Internal
             var tokens = new Queue<string>(ShellCommandTokenizer.Tokenize(input));
             var endsWithSpace = input.EndsWith(" ");
 
-            var commands = FindMatchedCommands(tokens, endsWithSpace);
+            var result = FindMatchedCommands(tokens, endsWithSpace);
 
-            if (commands.Count == 1)
+            if (result.Commands.Count == 1)
             {
-                var command = commands.First();
+                var command = result.Commands.First();
 
-                if (tokens.Any() || endsWithSpace)
+                if (tokens.Any() || (endsWithSpace && !result.IsTreeLevel))
                 {
                     var commandValue = command.Value as IShellCommand;
 
@@ -50,21 +50,21 @@ namespace ConsoleShell.Internal
                     {
                         var completeResult = commandValue.Complete(shell, tokens.ToArray()) ?? new string[] { };
 
-                        if (!(completeResult.Length == 1 && completeResult[0] == tokens.Last() && endsWithSpace))
+                        if (!(completeResult.Length == 1 && completeResult[0] == tokens.LastOrDefault() && endsWithSpace))
                         {
                             return completeResult;
                         }
                     }
 
                     return new string[] { };
-                }
+                }                
 
                 return new[] { command.Key };
             }
 
-            if (commands.Count > 1 && !tokens.Any())
+            if (result.Commands.Count > 1 && !tokens.Any())
             {
-                return commands.Keys.OrderBy(x => x, StringComparer.OrdinalIgnoreCase).ToArray();
+                return result.Commands.Keys.OrderBy(x => x, StringComparer.OrdinalIgnoreCase).ToArray();
             }
 
             return new string[] { };
@@ -73,11 +73,11 @@ namespace ConsoleShell.Internal
         public Action FindCommand(Shell shell, string[] tokens)
         {
             var tokensQueue = new Queue<string>(tokens);
-            var commands = FindMatchedCommands(tokensQueue);
+            var result = FindMatchedCommands(tokensQueue);
 
-            if (commands.Count == 1)
+            if (result.Commands.Count == 1)
             {
-                var command = (commands.First().Value as IShellCommand);
+                var command = (result.Commands.First().Value as IShellCommand);
                 if (command != null)
                 {
                     return () =>
@@ -90,7 +90,7 @@ namespace ConsoleShell.Internal
             return null;
         }
 
-        private SortedDictionary<string, object> FindMatchedCommands(Queue<string> tokens, bool fullMatch = false)
+        private FindMatchedResult FindMatchedCommands(Queue<string> tokens, bool fullMatch = false)
         {
             IDictionary<string, object> treeLevel = _commandsTree;
 
@@ -108,18 +108,18 @@ namespace ConsoleShell.Internal
 
                     if (match.Value is IShellCommand)
                     {
-                        return new SortedDictionary<string, object>
+                        return new FindMatchedResult(new SortedDictionary<string, object>
                         {
                             {match.Key, match.Value}
-                        };
+                        });
                     }
 
                     if (!tokens.Any() && !fullMatch)
                     {
-                        return new SortedDictionary<string, object>
+                        return new FindMatchedResult(new SortedDictionary<string, object>
                         {
                             {match.Key, match.Value}
-                        };
+                        });
                     }
 
                     treeLevel = match.Value as IDictionary<string, object>;
@@ -132,10 +132,10 @@ namespace ConsoleShell.Internal
                     continue;
                 }
 
-                return new SortedDictionary<string, object>(matches);
+                return new FindMatchedResult(new SortedDictionary<string, object>(matches));
             }
 
-            return new SortedDictionary<string, object>(treeLevel);
+            return new FindMatchedResult(new SortedDictionary<string, object>(treeLevel), true);
         }
 
         #region Commands operations
@@ -203,5 +203,17 @@ namespace ConsoleShell.Internal
         }
 
         #endregion
+
+        private class FindMatchedResult
+        {
+            public FindMatchedResult(SortedDictionary<string, object> commands, bool isTreeLevel = false)
+            {
+                Commands = commands;
+                IsTreeLevel = isTreeLevel;
+            }
+
+            public SortedDictionary<string, object> Commands { get; }
+            public bool IsTreeLevel { get; }
+        }
     }
 }

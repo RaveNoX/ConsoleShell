@@ -354,11 +354,13 @@ namespace ConsoleShell.Readline
                 TabComplete(this, e);
                 if (e.Insert != null)
                 {
+                    /*
                     if (_tabCount > 0)
                     {
                         GoBack(_insertedCount);
                         Delete(_insertedCount);
                     }
+                    //*/
 
                     _insertedCount = e.Insert.Length;
                     _savePosn = _posn;

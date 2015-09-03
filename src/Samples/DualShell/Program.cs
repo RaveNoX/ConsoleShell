@@ -59,7 +59,14 @@ namespace DualShell
             }
             else
             {
-                shell.ExecuteCommand(args);
+                try
+                {
+                    shell.ExecuteCommand(args);
+                }
+                catch (ShellCommandNotFoundException)
+                {
+                    ColorConsole.WriteLine("Invalid arguments".Red());
+                }
             }
         }
 
@@ -83,12 +90,27 @@ namespace DualShell
             shell.AddLambdaCommand("sip acl stick", InvokeFakeCommand);
             shell.AddLambdaCommand("sip acl flush", InvokeFakeCommand);
 
+            shell.AddLambdaCommand("ip show", InvokeFakeCommand);            
+
             shell.AddLambdaCommand("list", InvokeFakeCommand, CompleteHandler);
+            shell.AddLambdaCommand("show", InvokeFakeCommand, CompleteHandler2);
         }
 
         private static string[] CompleteHandler(Shell shell, IShellCommand command, string[] tokens)
         {
             var items = new[] {"users", "peers"};
+
+            if (tokens.Length == 0)
+            {
+                return items;
+            }
+
+            return tokens.Length == 1 ? items.Where(x => x.StartsWith(tokens[0])).ToArray() : null;
+        }
+
+        private static string[] CompleteHandler2(Shell shell, IShellCommand command, string[] tokens)
+        {
+            var items = new[] { "users" };
 
             if (tokens.Length == 0)
             {
@@ -147,6 +169,19 @@ namespace DualShell
         private static void InvokeFakeCommand(Shell shell, IShellCommand shellCommand, string[] args)
         {
             Console.WriteLine("Ivoke command \"{0}\" arguments: [ {1} ]", shellCommand.Pattern, string.Join(", ", args));
+        }
+
+        private static void InvokeFakeCommand2(Shell shell, IShellCommand shellCommand, string[] args)
+        {
+            if (args.Any())
+            {
+                Console.WriteLine("Ivoke command 2 \"{0}\" arguments: [ {1} ]", shellCommand.Pattern,
+                    string.Join(", ", args));
+            }
+            else
+            {
+                throw new ShellCommandNotFoundException();
+            }
         }
     }
 }

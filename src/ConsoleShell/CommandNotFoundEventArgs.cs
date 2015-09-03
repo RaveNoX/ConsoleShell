@@ -4,13 +4,11 @@ namespace ConsoleShell
 {
     public class CommandNotFoundEventArgs:EventArgs
     {
-        public CommandNotFoundEventArgs(string input, string[] tokens)
+        public CommandNotFoundEventArgs(string input)
         {
-            Input = input;
-            Tokens = tokens;
+            Input = input;            
         }
 
-        public string Input { get; }
-        public string[] Tokens { get; }
+        public string Input { get; }        
     }
 }
