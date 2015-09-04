@@ -43,13 +43,14 @@ namespace ConsoleShell
 
             while (true)
             {
-                var input = readline.ReadLine();
-                input = input.Trim();
+                var input = readline.ReadLine();                
 
                 if (string.IsNullOrWhiteSpace(input))
                 {
                     continue;
                 }
+
+                input = input.Trim();
 
                 try
                 {
