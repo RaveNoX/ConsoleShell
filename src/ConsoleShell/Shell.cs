@@ -12,7 +12,7 @@ namespace ConsoleShell
         #region Fields
 
         private ShellCommandsContainer _container = new ShellCommandsContainer();
-        private readonly object _lock = new object();
+        private readonly object _lock = new object();        
 
         #endregion
 
@@ -55,7 +55,7 @@ namespace ConsoleShell
                 {
                     ExecuteCommand(input);
                 }
-                catch (ShellCommandNotFoundException ex)
+                catch (ShellCommandNotFoundException)
                 {
                     OnShellCommandNotFound(input);
                 }

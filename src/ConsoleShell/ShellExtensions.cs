@@ -8,7 +8,7 @@ namespace ConsoleShell
 {
     public static class ShellExtensions
     {
-        public static Shell AddLambdaCommand(this Shell shell, string pattern, string description,
+        public static Shell AddCommand(this Shell shell, string pattern, string description,
             InvokeShellCommandDelegate invokeHandler, CompleteShellCommandDelegate completeHandler)
         {
             if (shell == null) throw new ArgumentNullException(nameof(shell));
@@ -30,22 +30,22 @@ namespace ConsoleShell
             return shell.AddCommand(command);
         }
 
-        public static Shell AddLambdaCommand(this Shell shell, string pattern, string description,
+        public static Shell AddCommand(this Shell shell, string pattern, string description,
             InvokeShellCommandDelegate invokeHandler)
         {
-            return shell.AddLambdaCommand(pattern, description, invokeHandler, null);
+            return shell.AddCommand(pattern, description, invokeHandler, null);
         }
 
-        public static Shell AddLambdaCommand(this Shell shell, string pattern,
+        public static Shell AddCommand(this Shell shell, string pattern,
             InvokeShellCommandDelegate invokeHandler, CompleteShellCommandDelegate completeHandler)
         {
-            return shell.AddLambdaCommand(pattern, null, invokeHandler, completeHandler);
+            return shell.AddCommand(pattern, null, invokeHandler, completeHandler);
         }
 
-        public static Shell AddLambdaCommand(this Shell shell, string pattern,
+        public static Shell AddCommand(this Shell shell, string pattern,
             InvokeShellCommandDelegate invokeHandler)
         {
-            return shell.AddLambdaCommand(pattern, invokeHandler, null);
+            return shell.AddCommand(pattern, invokeHandler, null);
         }
     }
 }

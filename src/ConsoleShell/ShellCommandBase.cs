@@ -60,6 +60,9 @@ namespace ConsoleShell
         /// </param>
         /// <param name="tokens">tokens array</param>
         /// <returns></returns>
-        public abstract string[] Complete(Shell shell, string[] tokens);
+        public virtual string[] Complete(Shell shell, string[] tokens)
+        {
+            return null;
+        }
     }
 }

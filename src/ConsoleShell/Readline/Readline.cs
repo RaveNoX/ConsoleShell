@@ -13,33 +13,29 @@ namespace ConsoleShell.Readline
     {
         public Readline(ShellHistory history)
         {
-            _ctrlCInterrupts = Path.DirectorySeparatorChar == '/';
-            Console.TreatControlCAsInput = !_ctrlCInterrupts;
-
             _history = history;
         }
 
-        #region Fields
+        #region Fields        
 
         // Internal state.
-        private bool _ctrlCInterrupts;
 
         // Line input buffer.
         private readonly char[] _buffer = new char[256];
         private readonly byte[] _widths = new byte[256];
+        private readonly string _newLine = "\n";
         private int _posn, _length, _column, _lastColumn;
         private bool _overwrite;
         private int _historyPosn;
         private string _historySave;
         private string _yankedString;
 
-        private static char[] _wordBreakChars = { ' ', '\n' };
+        private static char[] _wordBreakChars = {' ', '\n'};
         private readonly ShellHistory _history;
         private ReadlineState _state = ReadlineState.None;
         private readonly StringBuilder _lastWord = new StringBuilder();
         private int _savePosn;
         private int _tabCount = -1;
-        private int _insertedCount;
 
         #endregion
 
@@ -93,15 +89,7 @@ namespace ConsoleShell.Readline
         /// <remarks>
         ///     The default is true on Unix system, false otherwise.
         /// </remarks>
-        public bool CtrlCInterrupts
-        {
-            get { return _ctrlCInterrupts; }
-            set
-            {
-                Console.TreatControlCAsInput = !value;
-                _ctrlCInterrupts = value;
-            }
-        }
+        public bool CtrlCInterrupts { get; set; } = Path.DirectorySeparatorChar == '/';
 
 
         public string LineBuffer => new string(_buffer, 0, _length);
@@ -130,8 +118,8 @@ namespace ConsoleShell.Readline
         {
             if (_length >= _buffer.Length)
             {
-                var newBuffer = new char[_buffer.Length * 2];
-                var newWidths = new byte[_buffer.Length * 2];
+                var newBuffer = new char[_buffer.Length*2];
+                var newWidths = new byte[_buffer.Length*2];
                 Array.Copy(_buffer, 0, newBuffer, 0, _buffer.Length);
                 Array.Copy(_widths, 0, newWidths, 0, _buffer.Length);
             }
@@ -153,8 +141,8 @@ namespace ConsoleShell.Readline
             {
                 if (_buffer[posn] == '\t')
                 {
-                    width = 8 - (column % 8);
-                    _widths[posn] = (byte)width;
+                    width = 8 - (column%8);
+                    _widths[posn] = (byte) width;
                     while (width > 0)
                     {
                         Console.Write(' ');
@@ -165,7 +153,7 @@ namespace ConsoleShell.Readline
                 else if (_buffer[posn] < 0x20)
                 {
                     Console.Write('^');
-                    Console.Write((char)(_buffer[posn] + 0x40));
+                    Console.Write((char) (_buffer[posn] + 0x40));
                     _widths[posn] = 2;
                     column += 2;
                 }
@@ -270,7 +258,7 @@ namespace ConsoleShell.Readline
             }
             chars.Reverse();
             _lastWord.Length = 0;
-            _lastWord.Append((char[])chars.ToArray(typeof(char)));
+            _lastWord.Append((char[]) chars.ToArray(typeof (char)));
         }
 
         // Go back a specific number of characters.
@@ -319,7 +307,7 @@ namespace ConsoleShell.Readline
             }
             chars.Reverse();
             _lastWord.Length = 0;
-            _lastWord.Append((char[])chars.ToArray(typeof(char)));
+            _lastWord.Append((char[]) chars.ToArray(typeof (char)));
         }
 
         private void ResetComplete(ReadlineState newState)
@@ -354,15 +342,6 @@ namespace ConsoleShell.Readline
                 TabComplete(this, e);
                 if (e.Insert != null)
                 {
-                    /*
-                    if (_tabCount > 0)
-                    {
-                        GoBack(_insertedCount);
-                        Delete(_insertedCount);
-                    }
-                    //*/
-
-                    _insertedCount = e.Insert.Length;
                     _savePosn = _posn;
                     // Insert the value that we found.
                     var saveOverwrite = _overwrite;
@@ -408,7 +387,7 @@ namespace ConsoleShell.Readline
             Repaint(false, true);
 
             // Output the line terminator to the terminal.
-            Console.Write(Environment.NewLine);
+            Console.Write(_newLine);
         }
 
         // Move left one character.
@@ -671,54 +650,59 @@ namespace ConsoleShell.Readline
         // if an EOF indication is encountered in the input.
         public string ReadLine()
         {
-            // Output the prompt.
-            WritePrompt?.Invoke(this, EventArgs.Empty);
+            var treatControlCAsInterrupt = Console.TreatControlCAsInput;
+            Console.TreatControlCAsInput = !CtrlCInterrupts;
 
-            // Enter the main character input loop.
-            _posn = 0;
-            _length = 0;
-            _column = 0;
-            _lastColumn = 0;
-            _overwrite = false;
-            _historyPosn = -1;
-            var ctrlv = false;
-            _state = ReadlineState.MoreInput;
-            do
+            try
             {
-                var key = ConsoleExtensions.ReadKey(true);
-                var ch = key.KeyChar;
-                if (ctrlv)
+                // Output the prompt.
+                WritePrompt?.Invoke(this, EventArgs.Empty);
+
+                // Enter the main character input loop.
+                _posn = 0;
+                _length = 0;
+                _column = 0;
+                _lastColumn = 0;
+                _overwrite = false;
+                _historyPosn = -1;
+                var ctrlv = false;
+                _state = ReadlineState.MoreInput;
+                do
                 {
-                    ctrlv = false;
-                    if ((ch >= 0x0001 && ch <= 0x001F) || ch == 0x007F)
+                    var key = ConsoleExtensions.ReadKey(true);
+                    var ch = key.KeyChar;
+                    if (ctrlv)
                     {
-                        // Insert a control character into the buffer.
-                        AddChar(ch);
-                        continue;
+                        ctrlv = false;
+                        if ((ch >= 0x0001 && ch <= 0x001F) || ch == 0x007F)
+                        {
+                            // Insert a control character into the buffer.
+                            AddChar(ch);
+                            continue;
+                        }
                     }
-                }
-                if (ch != '\0')
-                {
-                    switch (ch)
+                    if (ch != '\0')
                     {
-                        case '\u0001':
+                        switch (ch)
+                        {
+                            case '\u0001':
                             {
                                 // CTRL-A: move to the home position.
                                 MoveHome();
                             }
-                            break;
+                                break;
 
-                        case '\u0002':
+                            case '\u0002':
                             {
                                 // CTRL-B: go back one character.
                                 MoveLeft();
                             }
-                            break;
+                                break;
 
-                        case '\u0003':
+                            case '\u0003':
                             {
                                 // CTRL-C encountered in "raw" mode.
-                                if (_ctrlCInterrupts)
+                                if (CtrlCInterrupts)
                                 {
                                     EndLine();
                                     Interrupt?.Invoke(null, EventArgs.Empty);
@@ -727,9 +711,9 @@ namespace ConsoleShell.Readline
                                 CancelLine();
                                 _lastWord.Length = 0;
                             }
-                            break;
+                                break;
 
-                        case '\u0004':
+                            case '\u0004':
                             {
                                 // CTRL-D: EOF or delete the current character.
                                 if (CtrlDIsEOF)
@@ -748,31 +732,31 @@ namespace ConsoleShell.Readline
                                     ResetComplete(ReadlineState.MoreInput);
                                 }
                             }
-                            break;
+                                break;
 
-                        case '\u0005':
+                            case '\u0005':
                             {
                                 // CTRL-E: move to the end position.
                                 MoveEnd();
                             }
-                            break;
+                                break;
 
-                        case '\u0006':
+                            case '\u0006':
                             {
                                 // CTRL-F: go forward one character.
                                 MoveRight();
                             }
-                            break;
+                                break;
 
-                        case '\u0007':
+                            case '\u0007':
                             {
                                 // CTRL-G: ring the terminal bell.
                                 Console.Beep();
                             }
-                            break;
+                                break;
 
-                        case '\u0008':
-                        case '\u007F':
+                            case '\u0008':
+                            case '\u007F':
                             {
                                 if (key.Key == ConsoleKey.Delete)
                                 {
@@ -786,79 +770,79 @@ namespace ConsoleShell.Readline
                                 }
                                 ResetComplete(ReadlineState.MoreInput);
                             }
-                            break;
+                                break;
 
-                        case '\u0009':
+                            case '\u0009':
                             {
                                 // Process a tab.
                                 Tab();
                             }
-                            break;
+                                break;
 
-                        case '\u000A':
-                        case '\u000D':
+                            case '\u000A':
+                            case '\u000D':
                             {
                                 // Line termination.
                                 EndLine();
                                 ResetComplete(ReadlineState.Done);
                                 _lastWord.Length = 0;
                             }
-                            break;
+                                break;
 
-                        case '\u000B':
+                            case '\u000B':
                             {
                                 // CTRL-K: erase until the end of the line.
                                 EraseToEnd();
                             }
-                            break;
+                                break;
 
-                        case '\u000C':
+                            case '\u000C':
                             {
                                 // CTRL-L: clear screen and redraw.
                                 Console.Clear();
                                 WritePrompt?.Invoke(this, EventArgs.Empty);
                                 Redraw();
                             }
-                            break;
+                                break;
 
-                        case '\u000E':
+                            case '\u000E':
                             {
                                 // CTRL-N: move down in the history.
                                 MoveDown();
                             }
-                            break;
+                                break;
 
-                        case '\u0010':
+                            case '\u0010':
                             {
                                 // CTRL-P: move up in the history.
                                 MoveUp();
                             }
-                            break;
+                                break;
 
-                        case '\u0015':
+                            case '\u0015':
                             {
                                 // CTRL-U: erase to the start of the line.
                                 EraseToStart();
                                 ResetComplete(ReadlineState.None);
                             }
-                            break;
+                                break;
 
-                        case '\u0016':
+                            case '\u0016':
                             {
                                 // CTRL-V: prefix a control character.
                                 ctrlv = true;
                             }
-                            break;
+                                break;
 
-                        case '\u0017':
+                            case '\u0017':
                             {
                                 // CTRL-W: erase the previous word.
                                 EraseWord();
                                 ResetComplete(ReadlineState.MoreInput);
                             }
-                            break;
+                                break;
 
-                        case '\u0019':
+                            case '\u0019':
                             {
                                 // CTRL-Y: yank the last erased string.
                                 if (_yankedString != null)
@@ -869,9 +853,9 @@ namespace ConsoleShell.Readline
                                     }
                                 }
                             }
-                            break;
+                                break;
 
-                        case '\u001A':
+                            case '\u001A':
                             {
                                 // CTRL-Z: Windows end of file indication.
                                 if (CtrlZIsEOF && _length == 0)
@@ -880,17 +864,17 @@ namespace ConsoleShell.Readline
                                     return null;
                                 }
                             }
-                            break;
+                                break;
 
-                        case '\u001B':
+                            case '\u001B':
                             {
                                 // Escape is "clear line".
                                 Clear();
                                 ResetComplete(ReadlineState.MoreInput);
                             }
-                            break;
+                                break;
 
-                        default:
+                            default:
                             {
                                 if (ch >= ' ')
                                 {
@@ -899,176 +883,191 @@ namespace ConsoleShell.Readline
                                     ResetComplete(ReadlineState.MoreInput);
                                 }
                             }
-                            break;
+                                break;
+                        }
                     }
-                }
-                else if (key.Modifiers == 0)
-                {
-                    switch (key.Key)
+                    else if (key.Modifiers == 0)
                     {
-                        case ConsoleKey.Backspace:
+                        switch (key.Key)
+                        {
+                            case ConsoleKey.Backspace:
                             {
                                 // Delete the character before the cursor.
                                 Backspace();
                                 ResetComplete(ReadlineState.MoreInput);
                             }
-                            break;
+                                break;
 
-                        case ConsoleKey.Delete:
+                            case ConsoleKey.Delete:
                             {
                                 // Delete the character under the cursor.
                                 Delete();
                                 ResetComplete(ReadlineState.MoreInput);
                             }
-                            break;
+                                break;
 
-                        case ConsoleKey.Enter:
+                            case ConsoleKey.Enter:
                             {
                                 // Line termination.
                                 EndLine();
                                 ResetComplete(ReadlineState.Done);
                             }
-                            break;
+                                break;
 
-                        case ConsoleKey.Escape:
+                            case ConsoleKey.Escape:
                             {
                                 // Clear the current line.
                                 Clear();
                                 ResetComplete(ReadlineState.None);
                             }
-                            break;
+                                break;
 
-                        case ConsoleKey.Tab:
+                            case ConsoleKey.Tab:
                             {
                                 // Process a tab.
                                 Tab();
                             }
-                            break;
+                                break;
 
-                        case ConsoleKey.LeftArrow:
+                            case ConsoleKey.LeftArrow:
                             {
                                 // Move left one character.
                                 MoveLeft();
                             }
-                            break;
+                                break;
 
-                        case ConsoleKey.RightArrow:
+                            case ConsoleKey.RightArrow:
                             {
                                 // Move right one character.
                                 MoveRight();
                             }
-                            break;
+                                break;
 
-                        case ConsoleKey.UpArrow:
+                            case ConsoleKey.UpArrow:
                             {
                                 // Move up one line in the history.
                                 MoveUp();
                             }
-                            break;
+                                break;
 
-                        case ConsoleKey.DownArrow:
+                            case ConsoleKey.DownArrow:
                             {
                                 // Move down one line in the history.
                                 MoveDown();
                             }
-                            break;
+                                break;
 
-                        case ConsoleKey.Home:
+                            case ConsoleKey.Home:
                             {
                                 // Move to the beginning of the line.
                                 MoveHome();
                             }
-                            break;
+                                break;
 
-                        case ConsoleKey.End:
+                            case ConsoleKey.End:
                             {
                                 // Move to the end of the line.
                                 MoveEnd();
                             }
-                            break;
+                                break;
 
-                        case ConsoleKey.Insert:
+                            case ConsoleKey.Insert:
                             {
                                 // Toggle insert/overwrite mode.
                                 _overwrite = !_overwrite;
                             }
-                            break;
+                                break;
+                        }
                     }
-                }
-                else if ((key.Modifiers & ConsoleModifiers.Alt) != 0)
-                {
-                    switch (key.Key)
+                    else if ((key.Modifiers & ConsoleModifiers.Alt) != 0)
                     {
-                        case ConsoleKey.F:
+                        switch (key.Key)
+                        {
+                            case ConsoleKey.F:
                             {
                                 // ALT-F: move forward a word.
                                 MoveForwardWord();
                             }
-                            break;
+                                break;
 
-                        case ConsoleKey.B:
+                            case ConsoleKey.B:
                             {
                                 // ALT-B: move backward a word.
                                 MoveBackwardWord();
                             }
-                            break;
+                                break;
 
-                        case ConsoleKey.D:
+                            case ConsoleKey.D:
                             {
                                 // ALT-D: erase until the end of the word.
                                 EraseToEndWord();
                             }
-                            break;
+                                break;
 
-                        case ConsoleKey.Backspace:
-                        case ConsoleKey.Delete:
+                            case ConsoleKey.Backspace:
+                            case ConsoleKey.Delete:
                             {
                                 // ALT-DEL: erase until the start of the word.
                                 EraseToStartWord();
                             }
-                            break;
+                                break;
+                        }
                     }
-                }
-            } while (_state != ReadlineState.Done);
-            return new string(_buffer, 0, _length);
+                } while (_state != ReadlineState.Done);
+                return new string(_buffer, 0, _length);
+            }
+            finally
+            {
+                Console.TreatControlCAsInput = treatControlCAsInterrupt;
+            }
         }
 
         public string ReadPassword()
         {
-            // Output the prompt.
-            WritePrompt?.Invoke(this, EventArgs.Empty);
+            var treatControlCAsInterrupt = Console.TreatControlCAsInput;
+            Console.TreatControlCAsInput = !CtrlCInterrupts;
 
-            var pass = new Stack();
-
-            for (var consKeyInfo = Console.ReadKey(true);
-                consKeyInfo.Key != ConsoleKey.Enter;
-                consKeyInfo = Console.ReadKey(true))
+            try
             {
-                if (consKeyInfo.Key == ConsoleKey.Backspace)
+                // Output the prompt.
+                WritePrompt?.Invoke(this, EventArgs.Empty);
+
+                var pass = new Stack();
+
+                for (var consKeyInfo = Console.ReadKey(true);
+                    consKeyInfo.Key != ConsoleKey.Enter;
+                    consKeyInfo = Console.ReadKey(true))
                 {
-                    try
+                    if (consKeyInfo.Key == ConsoleKey.Backspace)
                     {
-                        Console.SetCursorPosition(Console.CursorLeft - 1, Console.CursorTop);
-                        Console.Write(" ");
-                        Console.SetCursorPosition(Console.CursorLeft - 1, Console.CursorTop);
-                        pass.Pop();
+                        try
+                        {
+                            Console.SetCursorPosition(Console.CursorLeft - 1, Console.CursorTop);
+                            Console.Write(" ");
+                            Console.SetCursorPosition(Console.CursorLeft - 1, Console.CursorTop);
+                            pass.Pop();
+                        }
+                        catch (InvalidOperationException)
+                        {
+                            Console.SetCursorPosition(Console.CursorLeft + 1, Console.CursorTop);
+                        }
                     }
-                    catch (InvalidOperationException)
+                    else
                     {
-                        Console.SetCursorPosition(Console.CursorLeft + 1, Console.CursorTop);
+                        Console.Write("*");
+                        pass.Push(consKeyInfo.KeyChar.ToString());
                     }
                 }
-                else
-                {
-                    Console.Write("*");
-                    pass.Push(consKeyInfo.KeyChar.ToString());
-                }
+                var chars = pass.ToArray();
+                var password = new string[chars.Length];
+                Array.Copy(chars, password, chars.Length);
+                Array.Reverse(password);
+                return string.Join(string.Empty, password);
             }
-            var chars = pass.ToArray();
-            var password = new string[chars.Length];
-            Array.Copy(chars, password, chars.Length);
-            Array.Reverse(password);
-            return string.Join(string.Empty, password);
+            finally
+            {
+                Console.TreatControlCAsInput = treatControlCAsInterrupt;
+            }
         }
 
         #endregion
